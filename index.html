@@ -4,14 +4,23 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard DDISI — Secretaría de Hacienda</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/recharts/2.8.0/Recharts.js"></script>
+
+  <!-- Dependencias en orden correcto -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/react-is@18/umd/react-is.production.min.js"></script>
+  <script src="https://unpkg.com/prop-types@15/prop-types.min.js"></script>
+  <script src="https://unpkg.com/d3-scale@4/dist/d3-scale.umd.min.js"></script>
+  <script src="https://unpkg.com/d3-shape@3/dist/d3-shape.umd.min.js"></script>
+  <script src="https://unpkg.com/d3-path@3/dist/d3-path.umd.min.js"></script>
+  <script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.js"></script>
+  <script src="https://unpkg.com/@babel/standalone@7/babel.min.js"></script>
+
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Segoe UI', sans-serif; background: #f8fafc; }
+    body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f8fafc; }
     select, input, button { font-family: inherit; }
+    a { text-decoration: none; }
     @media print {
       .no-print { display: none !important; }
       body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -19,34 +28,36 @@
   </style>
 </head>
 <body>
-  <div id="root"></div>
+  <div id="root" style="padding:16px;min-height:100vh;"></div>
 
-  <script type="text/babel">
+  <script type="text/babel" data-presets="react">
     const { useState } = React;
     const {
       BarChart, Bar, RadarChart, Radar, PolarGrid, PolarAngleAxis,
       XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, Legend
     } = Recharts;
 
-    // ── DATOS REALES ──
-    const ENTIDADES_LIST = ["Todas las entidades","agencia app","bpp","bureau de medellin",
+    // ── DATOS ──
+    const ENT_LIST = [
+      "Todas las entidades","agencia app","bpp","bureau de medellin",
       "despacho secretaria de hacienda","empresa de desarrollo urbano","fonvalmed",
       "otra","secretaria de hacienda","subsecretaria de ingresos",
-      "subsecretaria de presupuesto y gestion financiera","subsecretaria de tesoreria"];
+      "subsecretaria de presupuesto y gestion financiera","subsecretaria de tesoreria"
+    ];
 
     const T4 = {
-      "agencia app":              {ap:90.65,au:73.25,bf:95.32,ce:89.09,dd:56.73,dm:72.21,ec:63.03,nw:73.64,oa:50.10,rs:95.64,gl:74.41},
-      "bpp":                      {ap:85.71,au:69.84,bf:90.48,ce:86.67,dd:55.56,dm:66.67,ec:65.43,nw:69.44,oa:53.09,rs:93.33,gl:72.30},
-      "bureau de medellin":       {ap:81.95,au:76.69,bf:90.23,ce:77.89,dd:44.21,dm:66.92,ec:58.48,nw:73.03,oa:53.22,rs:95.79,gl:70.86},
-      "despacho secretaria de hacienda":{ap:90.48,au:83.33,bf:100.00,ce:96.67,dd:73.33,dm:88.10,ec:62.96,nw:79.17,oa:61.11,rs:90.00,gl:80.92},
+      "agencia app":             {ap:90.65,au:73.25,bf:95.32,ce:89.09,dd:56.73,dm:72.21,ec:63.03,nw:73.64,oa:50.10,rs:95.64,gl:74.41},
+      "bpp":                     {ap:85.71,au:69.84,bf:90.48,ce:86.67,dd:55.56,dm:66.67,ec:65.43,nw:69.44,oa:53.09,rs:93.33,gl:72.30},
+      "bureau de medellin":      {ap:81.95,au:76.69,bf:90.23,ce:77.89,dd:44.21,dm:66.92,ec:58.48,nw:73.03,oa:53.22,rs:95.79,gl:70.86},
+      "despacho secretaria de hacienda":{ap:90.48,au:83.33,bf:100,ce:96.67,dd:73.33,dm:88.10,ec:62.96,nw:79.17,oa:61.11,rs:90.00,gl:80.92},
       "empresa de desarrollo urbano":   {ap:91.87,au:76.29,bf:94.54,ce:90.42,dd:65.14,dm:74.90,ec:68.36,nw:73.26,oa:49.69,rs:96.11,gl:76.38},
-      "fonvalmed":                {ap:89.42,au:79.89,bf:93.92,ce:85.19,dd:62.59,dm:73.54,ec:65.23,nw:74.31,oa:47.12,rs:96.30,gl:75.12},
-      "otra":                     {ap:100.00,au:85.71,bf:100.00,ce:90.00,dd:70.00,dm:78.57,ec:77.78,nw:75.00,oa:61.11,rs:100.00,gl:82.61},
-      "secretaria de hacienda":   {ap:59.01,au:57.14,bf:78.88,ce:72.17,dd:46.96,dm:68.32,ec:52.66,nw:57.07,oa:41.06,rs:79.13,gl:59.92},
+      "fonvalmed":               {ap:89.42,au:79.89,bf:93.92,ce:85.19,dd:62.59,dm:73.54,ec:65.23,nw:74.31,oa:47.12,rs:96.30,gl:75.12},
+      "otra":                    {ap:100,au:85.71,bf:100,ce:90,dd:70,dm:78.57,ec:77.78,nw:75,oa:61.11,rs:100,gl:82.61},
+      "secretaria de hacienda":  {ap:59.01,au:57.14,bf:78.88,ce:72.17,dd:46.96,dm:68.32,ec:52.66,nw:57.07,oa:41.06,rs:79.13,gl:59.92},
       "subsecretaria de ingresos":{ap:69.31,au:63.17,bf:81.81,ce:74.14,dd:50.31,dm:65.74,ec:56.68,nw:57.62,oa:45.83,rs:84.14,gl:63.58},
       "subsecretaria de presupuesto y gestion financiera":{ap:74.42,au:65.35,bf:87.74,ce:76.49,dd:52.03,dm:63.03,ec:58.03,nw:60.98,oa:46.77,rs:88.92,gl:65.97},
       "subsecretaria de tesoreria":{ap:77.51,au:66.79,bf:88.53,ce:78.68,dd:52.19,dm:69.67,ec:58.87,nw:62.72,oa:48.44,rs:90.00,gl:67.96},
-      "Todas las entidades":      {ap:78.28,au:68.30,bf:88.12,ce:79.92,dd:54.41,dm:68.75,ec:60.17,nw:64.23,oa:47.75,rs:89.77,gl:68.55},
+      "Todas las entidades":     {ap:78.28,au:68.30,bf:88.12,ce:79.92,dd:54.41,dm:68.75,ec:60.17,nw:64.23,oa:47.75,rs:89.77,gl:68.55},
     };
 
     const CK = [
@@ -59,8 +70,8 @@
 
     const T5 = {
       "agencia app":[
-        {area:"Dir. Administrativa y Financiera",pct:79.47},{area:"Dirección General",pct:72.75},
-        {area:"Subdirección de APP",pct:69.57},{area:"Subdirección Inmobiliaria",pct:71.01},
+        {area:"Dir. Adm. y Financiera",pct:79.47},{area:"Dirección General",pct:72.75},
+        {area:"Subdirección APP",pct:69.57},{area:"Subdirección Inmobiliaria",pct:71.01},
         {area:"Subdirección de Paisaje",pct:73.27},
       ],
       "bpp":[{area:"Sin Área",pct:72.30}],
@@ -78,14 +89,14 @@
       "fonvalmed":[
         {area:"Tecnología de la Información",pct:95.07},{area:"Defensa Jurídica",pct:97.10},
         {area:"Gestión Contractual",pct:86.47},{area:"Control Interno",pct:83.33},
-        {area:"Adm. Bienes y Servicios",pct:79.71},{area:"Conceptualización Proyectos",pct:79.47},
+        {area:"Adm. Bienes y Servicios",pct:79.71},{area:"Conceptualización Proy.",pct:79.47},
         {area:"Gestión de Cobro",pct:79.23},{area:"Gestión Documental",pct:78.74},
         {area:"Planeación Estratégica",pct:76.81},{area:"Adm. Obras Valorización",pct:73.08},
         {area:"Tramites Legales",pct:72.46},{area:"Planeación Financiera",pct:71.01},
         {area:"Gestión Recaudo/Pagos",pct:69.57},{area:"Gestión Humana",pct:69.57},
         {area:"Comunicaciones",pct:70.29},{area:"Servicio al Ciudadano",pct:69.57},
         {area:"Gestión Predial",pct:52.66},{area:"Gestión Jurídica",pct:52.17},
-        {area:"Gestion Contable",pct:57.97},{area:"Adm. Contribución Valorización",pct:42.03},
+        {area:"Gestion Contable",pct:57.97},{area:"Adm. Contribución Valoriz.",pct:42.03},
       ],
       "otra":[{area:"Sin Área",pct:82.61}],
       "secretaria de hacienda":[
@@ -107,8 +118,8 @@
       "subsecretaria de presupuesto y gestion financiera":[
         {area:"Presupuesto",pct:67.93},{area:"Contaduría",pct:66.23},
         {area:"Conciliaciones",pct:65.84},{area:"No Informado",pct:68.91},
-        {area:"Fondos",pct:61.23},{area:"Planif. y Análisis Fiscal",pct:60.14},
-        {area:"Planif. y Elaboración Ppto.",pct:60.87},{area:"Servicios Tributarios",pct:50.72},
+        {area:"Fondos",pct:61.23},{area:"Planif. Análisis Fiscal",pct:60.14},
+        {area:"Planif. Elaboración Ppto.",pct:60.87},{area:"Servicios Tributarios",pct:50.72},
         {area:"Facturación",pct:31.88},
       ],
       "subsecretaria de tesoreria":[
@@ -139,7 +150,7 @@
       "despacho secretaria de hacienda":{contratista:74.88,otro:null,vinculado:86.96},
       "empresa de desarrollo urbano":{contratista:76.30,otro:56.52,vinculado:76.97},
       "fonvalmed":{contratista:75.16,otro:89.86,vinculado:66.67},
-      "otra":{contratista:100.00,otro:null,vinculado:65.22},
+      "otra":{contratista:100,otro:null,vinculado:65.22},
       "secretaria de hacienda":{contratista:47.62,otro:null,vinculado:65.31},
       "subsecretaria de ingresos":{contratista:62.84,otro:null,vinculado:65.70},
       "subsecretaria de presupuesto y gestion financiera":{contratista:68.22,otro:null,vinculado:64.01},
@@ -148,18 +159,18 @@
     };
 
     const T8 = {
-      "agencia app":{auxiliar:61.96,lider:66.67,profesional:75.03,tecnico:80.92},
-      "bpp":{auxiliar:65.94,profesional:73.62,tecnico:75.36},
-      "bureau de medellin":{auxiliar:68.12,lider:91.30,profesional:69.28,tecnico:85.51},
-      "despacho secretaria de hacienda":{contratista:74.88,profesional:89.86,secretario:81.16},
-      "empresa de desarrollo urbano":{auxiliar:78.02,lider:65.65,profesional:76.91,tecnico:79.15},
-      "fonvalmed":{auxiliar:81.64,gerente:63.77,lider:75.12,profesional:72.51,tecnico:84.54},
-      "otra":{auxiliar:82.61},
-      "secretaria de hacienda":{auxiliar:55.07,contratista:47.62,lider:92.75,profesional:75.72,secretario:51.45,tecnico:84.06},
-      "subsecretaria de ingresos":{auxiliar:78.53,contratista:62.84,lider:61.59,profesional:60.43,secretario:81.64,tecnico:56.52},
-      "subsecretaria de presupuesto y gestion financiera":{contratista:68.22,lider:67.21,profesional:65.78,tecnico:56.86},
-      "subsecretaria de tesoreria":{auxiliar:55.39,contratista:69.10,lider:65.80,profesional:69.57,secretario:59.42,tecnico:39.49},
-      "Todas las entidades":{auxiliar:70.92,contratista:66.08,gerente:63.77,lider:68.26,profesional:72.03,secretario:65.70,tecnico:67.54},
+      "agencia app":{Auxiliar:61.96,Líder:66.67,Profesional:75.03,Técnico:80.92},
+      "bpp":{Auxiliar:65.94,Profesional:73.62,Técnico:75.36},
+      "bureau de medellin":{Auxiliar:68.12,Líder:91.30,Profesional:69.28,Técnico:85.51},
+      "despacho secretaria de hacienda":{Contratista:74.88,Profesional:89.86,Secretario:81.16},
+      "empresa de desarrollo urbano":{Auxiliar:78.02,Líder:65.65,Profesional:76.91,Técnico:79.15},
+      "fonvalmed":{Auxiliar:81.64,Gerente:63.77,Líder:75.12,Profesional:72.51,Técnico:84.54},
+      "otra":{Auxiliar:82.61},
+      "secretaria de hacienda":{Auxiliar:55.07,Contratista:47.62,Líder:92.75,Profesional:75.72,Secretario:51.45,Técnico:84.06},
+      "subsecretaria de ingresos":{Auxiliar:78.53,Contratista:62.84,Líder:61.59,Profesional:60.43,Secretario:81.64,Técnico:56.52},
+      "subsecretaria de presupuesto y gestion financiera":{Contratista:68.22,Líder:67.21,Profesional:65.78,Técnico:56.86},
+      "subsecretaria de tesoreria":{Auxiliar:55.39,Contratista:69.10,Líder:65.80,Profesional:69.57,Secretario:59.42,Técnico:39.49},
+      "Todas las entidades":{Auxiliar:70.92,Contratista:66.08,Gerente:63.77,Líder:68.26,Profesional:72.03,Secretario:65.70,Técnico:67.54},
     };
 
     const T9 = {
@@ -168,127 +179,134 @@
     };
 
     const T10 = {
-      contratista:{ap:78.90,au:67.84,bf:88.27,ce:79.70,dd:55.94,dm:70.53,ec:61.22,nw:64.45,oa:48.39,rs:89.50},
-      otro:{ap:82.86,au:62.86,bf:94.29,ce:84.00,dd:52.00,dm:60.00,ec:53.33,nw:57.50,oa:35.56,rs:96.00},
-      vinculado:{ap:76.69,au:69.50,bf:87.64,ce:80.36,dd:50.73,dm:64.60,ec:57.75,nw:63.82,oa:46.43,rs:90.29},
+      Contratista:{ap:78.90,au:67.84,bf:88.27,ce:79.70,dd:55.94,dm:70.53,ec:61.22,nw:64.45,oa:48.39,rs:89.50},
+      Otro:       {ap:82.86,au:62.86,bf:94.29,ce:84.00,dd:52.00,dm:60.00,ec:53.33,nw:57.50,oa:35.56,rs:96.00},
+      Vinculado:  {ap:76.69,au:69.50,bf:87.64,ce:80.36,dd:50.73,dm:64.60,ec:57.75,nw:63.82,oa:46.43,rs:90.29},
     };
 
-    // ── UTILIDADES ──
+    // ── HELPERS ──
     const cap = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : "";
     const clr = p => p == null ? "#cbd5e1" : p >= 70 ? "#10b981" : p >= 50 ? "#f59e0b" : "#ef4444";
-    const bg  = p => p == null ? "#f1f5f9" : p >= 70 ? "#dcfce7" : p >= 50 ? "#fef9c3" : "#fee2e2";
-    const fc  = p => p == null ? "#94a3b8" : p >= 70 ? "#16a34a" : p >= 50 ? "#b45309" : "#dc2626";
+    const bgc = p => p == null ? "#f1f5f9" : p >= 70 ? "#dcfce7" : p >= 50 ? "#fef9c3" : "#fee2e2";
+    const fgc = p => p == null ? "#94a3b8" : p >= 70 ? "#16a34a" : p >= 50 ? "#b45309" : "#dc2626";
     const C   = ["#6366f1","#10b981","#f59e0b","#ef4444","#8b5cf6","#ec4899","#14b8a6","#f97316","#84cc16","#3b82f6"];
+    const fmt = v => v != null ? `${Number(v).toFixed(1)}%` : "—";
 
-    const getAnalysis = (ent, d) => {
-      const sorted = [...CK].sort((a,b) => d[b.k] - d[a.k]);
-      const best  = sorted.slice(0,2).map(c => c.label).join(" y ");
-      const worst = sorted.slice(-2).map(c => c.label).join(" y ");
-      const nivel = d.gl >= 70 ? "aceptable" : d.gl >= 50 ? "medio con áreas de mejora" : "crítico y requiere intervención urgente";
-      return `${cap(ent)} presenta un cumplimiento global de ${d.gl?.toFixed(1)}%, nivel ${nivel}. Las mejores prácticas se observan en ${best}. Los conceptos con mayor brecha son ${worst}, donde se recomienda priorizar planes de formación y sensibilización.`;
+    const analysis = (ent, d) => {
+      const s = [...CK].sort((a,b) => d[b.k] - d[a.k]);
+      const best  = s.slice(0,2).map(c => c.label).join(" y ");
+      const worst = s.slice(-2).map(c => c.label).join(" y ");
+      const lvl = d.gl >= 70 ? "aceptable" : d.gl >= 50 ? "medio con áreas de mejora" : "crítico y requiere intervención urgente";
+      return `${cap(ent)} presenta un cumplimiento global de ${fmt(d.gl)}, nivel ${lvl}. Las mejores prácticas se observan en ${best}. Los conceptos con mayor brecha son ${worst}, donde se recomienda priorizar planes de formación y sensibilización.`;
     };
 
     // ── COMPONENTES ──
-    const Card = ({title, children, col="1/-1"}) => (
-      <div style={{background:"#fff",borderRadius:10,padding:16,boxShadow:"0 1px 3px rgba(0,0,0,.07)",gridColumn:col,overflow:"hidden"}}>
+    const Card = ({title, children, span2}) => (
+      <div style={{background:"#fff",borderRadius:10,padding:16,boxShadow:"0 1px 3px rgba(0,0,0,.07)",
+        gridColumn:span2?"1/-1":"auto",overflow:"hidden"}}>
         {title && <h3 style={{margin:"0 0 12px",fontSize:13,fontWeight:700,color:"#1e293b"}}>{title}</h3>}
         {children}
       </div>
     );
 
-    const SBar = ({label, p, color, h=6}) => (
+    const SBar = ({label, p, color}) => (
       <div style={{marginBottom:8}}>
         <div style={{display:"flex",justifyContent:"space-between",fontSize:11,color:"#475569",marginBottom:2}}>
           <span style={{flex:1,marginRight:8,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{label}</span>
-          <span style={{fontWeight:700,color:color||clr(p),minWidth:36,textAlign:"right"}}>{p!=null?p.toFixed(1)+"%":"—"}</span>
+          <span style={{fontWeight:700,color:color||clr(p),minWidth:40,textAlign:"right"}}>{fmt(p)}</span>
         </div>
-        <div style={{background:"#f1f5f9",borderRadius:99,height:h,overflow:"hidden"}}>
-          {p!=null && <div style={{width:`${p}%`,height:"100%",borderRadius:99,background:color||clr(p)}}/>}
+        <div style={{background:"#f1f5f9",borderRadius:99,height:6,overflow:"hidden"}}>
+          {p != null && <div style={{width:`${p}%`,height:"100%",borderRadius:99,background:color||clr(p)}}/>}
         </div>
       </div>
     );
 
-    const TabBtn = ({id, label, active, onClick}) => (
-      <button onClick={() => onClick(id)} style={{
-        padding:"7px 12px",borderRadius:8,border:"none",cursor:"pointer",
-        fontSize:11,fontWeight:600,whiteSpace:"nowrap",
-        background:active?"#6366f1":"#e2e8f0",color:active?"#fff":"#475569"
-      }}>{label}</button>
+    const Pill = ({p}) => (
+      <span style={{padding:"2px 8px",borderRadius:99,fontSize:11,fontWeight:700,background:bgc(p),color:fgc(p)}}>{fmt(p)}</span>
     );
 
-    // ── APP PRINCIPAL ──
+    const TabBtn = ({id,label,active,onClick}) => (
+      <button onClick={() => onClick(id)} style={{padding:"7px 12px",borderRadius:8,border:"none",
+        cursor:"pointer",fontSize:11,fontWeight:600,whiteSpace:"nowrap",
+        background:active?"#6366f1":"#e2e8f0",color:active?"#fff":"#475569"}}>
+        {label}
+      </button>
+    );
+
+    // ── APP ──
     function App() {
-      const [tab, setTab]   = useState("resumen");
+      const [tab,  setTab]  = useState("resumen");
       const [entA, setEntA] = useState("Todas las entidades");
       const [entB, setEntB] = useState("empresa de desarrollo urbano");
       const [cmp,  setCmp]  = useState(false);
 
       const dA = T4[entA] || T4["Todas las entidades"];
       const dB = T4[entB] || T4["Todas las entidades"];
-      const entLabel = e => e.length > 30 ? e.slice(0,28)+"…" : cap(e);
+      const lbl = e => e.length > 28 ? e.slice(0,26)+"…" : cap(e);
 
-      const handlePrint = () => {
+      const doPrint = () => {
         const s = document.createElement("style");
-        s.innerHTML = `@media print { .no-print { display:none!important; } body { -webkit-print-color-adjust:exact; print-color-adjust:exact; } }`;
+        s.innerHTML = "@media print{.no-print{display:none!important}body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}";
         document.head.appendChild(s);
         window.print();
         setTimeout(() => document.head.removeChild(s), 1000);
       };
 
-      const BarsChart = ({data, kA, kB, xKey="name", h=220, layout="horizontal"}) => (
+      const Bars = ({data, kA, kB, xKey="name", h=220, vert=false}) => (
         <ResponsiveContainer width="100%" height={h}>
-          {layout === "vertical"
+          {vert
             ? <BarChart data={data} layout="vertical" margin={{left:10,right:40}}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9"/>
                 <XAxis type="number" domain={[0,100]} tickFormatter={v=>`${v}%`} tick={{fontSize:9}}/>
                 <YAxis type="category" dataKey={xKey} width={160} tick={{fontSize:9}}/>
-                <Tooltip formatter={v=>v!=null?`${v.toFixed(1)}%`:"—"}/>
+                <Tooltip formatter={fmt}/>
                 {cmp && <Legend wrapperStyle={{fontSize:9}}/>}
-                <Bar name={entLabel(kA)} dataKey={kA} fill={C[0]} radius={[0,5,5,0]}>
+                <Bar name={lbl(kA)} dataKey={kA} fill={C[0]} radius={[0,5,5,0]}>
                   {data.map((d,i) => <Cell key={i} fill={cmp ? C[0] : clr(d[kA])}/>)}
                 </Bar>
-                {cmp && <Bar name={entLabel(kB)} dataKey={kB} fill={C[1]} radius={[0,5,5,0]} opacity={.85}/>}
+                {cmp && <Bar name={lbl(kB)} dataKey={kB} fill={C[1]} radius={[0,5,5,0]} opacity={.85}/>}
               </BarChart>
             : <BarChart data={data}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9"/>
                 <XAxis dataKey={xKey} tick={{fontSize:9}} interval={0}/>
                 <YAxis domain={[0,100]} tickFormatter={v=>`${v}%`} tick={{fontSize:9}}/>
-                <Tooltip formatter={v=>v!=null?`${v.toFixed(1)}%`:"—"}/>
+                <Tooltip formatter={fmt}/>
                 {cmp && <Legend wrapperStyle={{fontSize:9}}/>}
-                <Bar name={entLabel(kA)} dataKey={kA} fill={C[0]} radius={[4,4,0,0]}>
+                <Bar name={lbl(kA)} dataKey={kA} fill={C[0]} radius={[4,4,0,0]}>
                   {data.map((d,i) => <Cell key={i} fill={cmp ? C[0] : clr(d[kA])}/>)}
                 </Bar>
-                {cmp && <Bar name={entLabel(kB)} dataKey={kB} fill={C[1]} radius={[4,4,0,0]} opacity={.85}/>}
+                {cmp && <Bar name={lbl(kB)} dataKey={kB} fill={C[1]} radius={[4,4,0,0]} opacity={.85}/>}
               </BarChart>}
         </ResponsiveContainer>
       );
 
-      const conceptosData = CK.map(c => ({concepto:c.label,[entA]:dA[c.k],...(cmp?{[entB]:dB[c.k]}:{})}));
-      const genData  = [{name:"Femenino",[entA]:T6[entA]?.f,...(cmp?{[entB]:T6[entB]?.f}:{})},
-                        {name:"Masculino",[entA]:T6[entA]?.m,...(cmp?{[entB]:T6[entB]?.m}:{})}].filter(r=>r[entA]!=null);
-      const tipoData = ["contratista","vinculado","otro"].map(t=>({name:cap(t),[entA]:T7[entA]?.[t],...(cmp?{[entB]:T7[entB]?.[t]}:{})})).filter(r=>r[entA]!=null);
-      const ocupData = Object.keys(T8["Todas las entidades"]).map(o=>({name:cap(o),[entA]:T8[entA]?.[o],...(cmp?{[entB]:T8[entB]?.[o]}:{})})).filter(r=>r[entA]!=null);
-      const areasA   = (T5[entA]||[]).slice().sort((a,b)=>b.pct-a.pct);
-      const areasB   = (T5[entB]||[]).slice().sort((a,b)=>b.pct-a.pct);
+      const cData  = CK.map(c => ({concepto:c.label,[entA]:dA[c.k],...(cmp?{[entB]:dB[c.k]}:{})}));
+      const gData  = [{name:"Femenino",[entA]:T6[entA]?.f,...(cmp?{[entB]:T6[entB]?.f}:{})},
+                      {name:"Masculino",[entA]:T6[entA]?.m,...(cmp?{[entB]:T6[entB]?.m}:{})}].filter(r=>r[entA]!=null);
+      const tData  = ["contratista","vinculado","otro"].map(t=>({name:cap(t),[entA]:T7[entA]?.[t],...(cmp?{[entB]:T7[entB]?.[t]}:{})})).filter(r=>r[entA]!=null);
+      const oData  = Object.keys(T8["Todas las entidades"]).map(o=>({name:o,[entA]:T8[entA]?.[o],...(cmp?{[entB]:T8[entB]?.[o]}:{})})).filter(r=>r[entA]!=null);
+      const areasA = (T5[entA]||[]).slice().sort((a,b)=>b.pct-a.pct);
+      const areasB = (T5[entB]||[]).slice().sort((a,b)=>b.pct-a.pct);
+
+      const grid2 = {display:"grid",gridTemplateColumns:"1fr 1fr",gap:14};
 
       return (
-        <div style={{padding:16,minHeight:"100vh"}}>
-
+        <div>
           {/* HEADER */}
           <div style={{background:"#1e293b",borderRadius:10,padding:"14px 18px",marginBottom:14,
             display:"flex",justifyContent:"space-between",alignItems:"flex-start",flexWrap:"wrap",gap:8}}>
             <div>
-              <h1 style={{margin:0,fontSize:14,fontWeight:700,color:"#fff",lineHeight:1.3}}>
+              <div style={{fontSize:14,fontWeight:700,color:"#fff",lineHeight:1.3}}>
                 Dashboard Diagnóstico Defensa Digital Individual de Seguridad de la Información (DDISI)
-              </h1>
-              <h2 style={{margin:"2px 0 0",fontSize:12,fontWeight:400,color:"#94a3b8"}}>
+              </div>
+              <div style={{fontSize:12,fontWeight:400,color:"#94a3b8",marginTop:2}}>
                 Secretaría de Hacienda y Conglomerado Público
-              </h2>
-              <p style={{margin:"4px 0 0",fontSize:10,color:"#64748b"}}>Fecha actualización: Abril 2026</p>
+              </div>
+              <div style={{fontSize:10,color:"#64748b",marginTop:4}}>Fecha actualización: Abril 2026</div>
             </div>
-            <button className="no-print" onClick={handlePrint}
-              style={{background:"#6366f1",color:"#fff",border:"none",borderRadius:8,padding:"8px 16px",
-                fontSize:12,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap"}}>
+            <button className="no-print" onClick={doPrint}
+              style={{background:"#6366f1",color:"#fff",border:"none",borderRadius:8,
+                padding:"8px 16px",fontSize:12,fontWeight:600,cursor:"pointer"}}>
               📄 Descargar PDF
             </button>
           </div>
@@ -301,10 +319,11 @@
                 <div style={{fontSize:10,color:"#64748b",marginBottom:3}}>📊 Entidad principal</div>
                 <select value={entA} onChange={e=>setEntA(e.target.value)}
                   style={{width:"100%",padding:"6px 8px",borderRadius:7,border:"1px solid #e2e8f0",fontSize:11}}>
-                  {ENTIDADES_LIST.map(e=><option key={e} value={e}>{cap(e)}</option>)}
+                  {ENT_LIST.map(e=><option key={e} value={e}>{cap(e)}</option>)}
                 </select>
               </div>
-              <label style={{fontSize:11,color:"#475569",display:"flex",alignItems:"center",gap:6,cursor:"pointer",paddingBottom:4}}>
+              <label style={{fontSize:11,color:"#475569",display:"flex",alignItems:"center",
+                gap:6,cursor:"pointer",paddingBottom:4}}>
                 <input type="checkbox" checked={cmp} onChange={e=>setCmp(e.target.checked)}/>
                 Comparar con otra entidad
               </label>
@@ -313,7 +332,7 @@
                   <div style={{fontSize:10,color:"#64748b",marginBottom:3}}>🆚 Entidad a comparar</div>
                   <select value={entB} onChange={e=>setEntB(e.target.value)}
                     style={{width:"100%",padding:"6px 8px",borderRadius:7,border:"1px solid #e2e8f0",fontSize:11}}>
-                    {ENTIDADES_LIST.filter(e=>e!==entA).map(e=><option key={e} value={e}>{cap(e)}</option>)}
+                    {ENT_LIST.filter(e=>e!==entA).map(e=><option key={e} value={e}>{cap(e)}</option>)}
                   </select>
                 </div>
               )}
@@ -323,11 +342,15 @@
           {/* KPIs */}
           <div style={{display:"grid",gridTemplateColumns:`repeat(${cmp?4:3},1fr)`,gap:10,marginBottom:14}}>
             {[
-              {icon:"🏢",label:"Entidad",val:entLabel(entA),col:C[0]},
-              {icon:"🎯",label:"Cumplimiento",val:`${dA.gl?.toFixed(1)}%`,sub:dA.gl>=70?"✓ Aceptable":dA.gl>=50?"⚠ En riesgo":"✗ Crítico",scol:clr(dA.gl),col:C[0]},
+              {icon:"🏢",label:"Entidad",val:lbl(entA),col:C[0]},
+              {icon:"🎯",label:"Cumplimiento",val:fmt(dA.gl),
+                sub:dA.gl>=70?"✓ Aceptable":dA.gl>=50?"⚠ En riesgo":"✗ Crítico",
+                scol:clr(dA.gl),col:C[0]},
               ...(cmp?[
-                {icon:"🏢",label:"Comparar con",val:entLabel(entB),col:C[1]},
-                {icon:"🎯",label:"Cumplimiento",val:`${dB.gl?.toFixed(1)}%`,sub:dB.gl>=70?"✓ Aceptable":dB.gl>=50?"⚠ En riesgo":"✗ Crítico",scol:clr(dB.gl),col:C[1]},
+                {icon:"🏢",label:"Comparar con",val:lbl(entB),col:C[1]},
+                {icon:"🎯",label:"Cumplimiento",val:fmt(dB.gl),
+                  sub:dB.gl>=70?"✓ Aceptable":dB.gl>=50?"⚠ En riesgo":"✗ Crítico",
+                  scol:clr(dB.gl),col:C[1]},
               ]:[{icon:"🌐",label:"Promedio Global",val:"68.55%",sub:"⚠ En riesgo",scol:"#f59e0b",col:"#64748b"}]),
             ].map((k,i)=>(
               <div key={i} style={{background:"#fff",borderRadius:10,padding:"12px 14px",
@@ -349,15 +372,15 @@
 
           {/* RESUMEN */}
           {tab==="resumen" && (
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}>
-              <Card title={cmp?`Radar — ${entLabel(entA)} vs ${entLabel(entB)}`:`Radar de Conceptos — ${entLabel(entA)}`}>
+            <div style={grid2}>
+              <Card title={cmp?`Radar — ${lbl(entA)} vs ${lbl(entB)}`:`Radar — ${lbl(entA)}`}>
                 <ResponsiveContainer width="100%" height={230}>
-                  <RadarChart data={CK.map(c=>({name:c.label.slice(0,13),A:dA[c.k],B:dB[c.k]}))}>
+                  <RadarChart data={CK.map(c=>({name:c.label.slice(0,12),A:dA[c.k],B:dB[c.k]}))}>
                     <PolarGrid stroke="#f1f5f9"/>
                     <PolarAngleAxis dataKey="name" tick={{fontSize:8}}/>
-                    <Radar name={entLabel(entA)} dataKey="A" stroke={C[0]} fill={C[0]} fillOpacity={.2} strokeWidth={2}/>
-                    {cmp && <Radar name={entLabel(entB)} dataKey="B" stroke={C[1]} fill={C[1]} fillOpacity={.15} strokeWidth={2}/>}
-                    <Tooltip formatter={v=>`${v?.toFixed(1)}%`}/>
+                    <Radar name={lbl(entA)} dataKey="A" stroke={C[0]} fill={C[0]} fillOpacity={.2} strokeWidth={2}/>
+                    {cmp && <Radar name={lbl(entB)} dataKey="B" stroke={C[1]} fill={C[1]} fillOpacity={.15} strokeWidth={2}/>}
+                    <Tooltip formatter={fmt}/>
                     {cmp && <Legend wrapperStyle={{fontSize:9}}/>}
                   </RadarChart>
                 </ResponsiveContainer>
@@ -369,8 +392,8 @@
                     <div style={{display:"flex",justifyContent:"space-between",fontSize:11,color:"#475569",marginBottom:2}}>
                       <span>{c.label}</span>
                       <div style={{display:"flex",gap:8}}>
-                        <span style={{fontWeight:700,color:clr(dA[c.k])}}>{dA[c.k]?.toFixed(1)}%</span>
-                        {cmp && <span style={{fontWeight:700,color:C[1]}}>{dB[c.k]?.toFixed(1)}%</span>}
+                        <span style={{fontWeight:700,color:clr(dA[c.k])}}>{fmt(dA[c.k])}</span>
+                        {cmp && <span style={{fontWeight:700,color:C[1]}}>{fmt(dB[c.k])}</span>}
                       </div>
                     </div>
                     <div style={{background:"#f1f5f9",borderRadius:99,height:5,overflow:"hidden",position:"relative"}}>
@@ -381,26 +404,27 @@
                 ))}
               </Card>
 
-              <Card title="Comparativo entre Todas las Entidades" col="1/-1">
+              <Card title="Todas las Entidades" span2>
                 <ResponsiveContainer width="100%" height={190}>
-                  <BarChart data={ENTIDADES_LIST.filter(e=>e!=="Todas las entidades").map(e=>({name:cap(e).slice(0,18),pct:T4[e]?.gl}))}>
+                  <BarChart data={ENT_LIST.filter(e=>e!=="Todas las entidades").map(e=>({name:cap(e).slice(0,18),pct:T4[e]?.gl}))}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9"/>
                     <XAxis dataKey="name" tick={{fontSize:8}} interval={0}/>
                     <YAxis domain={[0,100]} tickFormatter={v=>`${v}%`} tick={{fontSize:9}}/>
-                    <Tooltip formatter={v=>`${v?.toFixed(1)}%`}/>
+                    <Tooltip formatter={fmt}/>
                     <Bar dataKey="pct" radius={[4,4,0,0]}>
-                      {ENTIDADES_LIST.filter(e=>e!=="Todas las entidades").map((e,i)=><Cell key={i} fill={clr(T4[e]?.gl)}/>)}
+                      {ENT_LIST.filter(e=>e!=="Todas las entidades").map((e,i)=><Cell key={i} fill={clr(T4[e]?.gl)}/>)}
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </Card>
 
-              <Card title={`📋 Análisis — ${entLabel(entA)}`} col="1/-1">
+              <Card title={`📋 Análisis — ${lbl(entA)}`} span2>
                 <div style={{background:"#f8fafc",borderRadius:8,padding:"12px 14px",fontSize:12,color:"#334155",lineHeight:1.6}}>
-                  {getAnalysis(entA,dA)}
+                  {analysis(entA, dA)}
                 </div>
-                {cmp && <div style={{background:"#f0fdf4",borderRadius:8,padding:"12px 14px",fontSize:12,color:"#334155",lineHeight:1.6,marginTop:8,borderLeft:`3px solid ${C[1]}`}}>
-                  {getAnalysis(entB,dB)}
+                {cmp && <div style={{background:"#f0fdf4",borderRadius:8,padding:"12px 14px",fontSize:12,
+                  color:"#334155",lineHeight:1.6,marginTop:8,borderLeft:`3px solid ${C[1]}`}}>
+                  {analysis(entB, dB)}
                 </div>}
               </Card>
             </div>
@@ -408,31 +432,31 @@
 
           {/* CONCEPTOS */}
           {tab==="conceptos" && (
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}>
-              <Card title="Barras por Concepto" col="1/-1">
-                <BarsChart data={conceptosData} kA={entA} kB={entB} xKey="concepto" h={220}/>
+            <div style={grid2}>
+              <Card title="Barras por Concepto" span2>
+                <Bars data={cData} kA={entA} kB={entB} xKey="concepto" h={220}/>
               </Card>
-              {CK.map((c,i)=>{
-                const cB=dB[c.k];
-                return (
-                  <Card key={i} title={c.label}>
-                    <div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}>
-                      <span style={{padding:"2px 8px",borderRadius:99,fontSize:11,fontWeight:700,background:bg(dA[c.k]),color:fc(dA[c.k])}}>{dA[c.k]?.toFixed(1)}%</span>
-                      {cmp && <span style={{padding:"2px 8px",borderRadius:99,fontSize:11,fontWeight:700,background:bg(cB),color:fc(cB)}}>{cB?.toFixed(1)}%</span>}
-                    </div>
+              {CK.map((c,i) => (
+                <Card key={i} title={c.label}>
+                  <div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}>
+                    <Pill p={dA[c.k]}/> {cmp && <Pill p={dB[c.k]}/>}
+                  </div>
+                  <div style={{background:"#f1f5f9",borderRadius:99,height:7,marginBottom:4}}>
+                    <div style={{width:`${dA[c.k]}%`,height:"100%",background:C[0],borderRadius:99}}/>
+                  </div>
+                  {cmp && <>
                     <div style={{background:"#f1f5f9",borderRadius:99,height:7,marginBottom:4}}>
-                      <div style={{width:`${dA[c.k]}%`,height:"100%",background:C[0],borderRadius:99}}/>
+                      <div style={{width:`${dB[c.k]}%`,height:"100%",background:C[1],borderRadius:99}}/>
                     </div>
-                    {cmp && <><div style={{background:"#f1f5f9",borderRadius:99,height:7,marginBottom:4}}>
-                      <div style={{width:`${cB}%`,height:"100%",background:C[1],borderRadius:99}}/>
+                    <div style={{fontSize:10,fontWeight:600,color:dA[c.k]>=dB[c.k]?"#10b981":"#ef4444"}}>
+                      {dA[c.k]>=dB[c.k]?"▲":"▼"} Dif: {Math.abs(dA[c.k]-dB[c.k]).toFixed(1)}pp
                     </div>
-                    <div style={{fontSize:10,color:dA[c.k]>=cB?"#10b981":"#ef4444",fontWeight:600}}>
-                      {dA[c.k]>=cB?"▲":"▼"} Dif: {Math.abs(dA[c.k]-cB).toFixed(1)}pp
-                    </div></>}
-                    <div style={{fontSize:10,color:"#64748b",marginTop:4}}>{dA[c.k]>=70?"✓ Aceptable":dA[c.k]>=50?"⚠ Atención":"✗ Crítico"}</div>
-                  </Card>
-                );
-              })}
+                  </>}
+                  <div style={{fontSize:10,color:"#64748b",marginTop:4}}>
+                    {dA[c.k]>=70?"✓ Aceptable":dA[c.k]>=50?"⚠ Atención":"✗ Crítico"}
+                  </div>
+                </Card>
+              ))}
             </div>
           )}
 
@@ -440,15 +464,15 @@
           {tab==="areas" && (
             <div style={{display:"grid",gridTemplateColumns:cmp?"1fr 1fr":"1fr",gap:14}}>
               {[{e:entA,data:areasA},...(cmp?[{e:entB,data:areasB}]:[])].map(({e,data})=>(
-                <Card key={e} title={`Áreas — ${entLabel(e)}`}>
-                  {data.length===0
+                <Card key={e} title={`Áreas — ${lbl(e)}`}>
+                  {!data||data.length===0
                     ? <p style={{fontSize:11,color:"#94a3b8"}}>No hay datos de áreas para esta entidad.</p>
                     : <ResponsiveContainer width="100%" height={Math.max(200,data.length*26)}>
                         <BarChart data={data} layout="vertical" margin={{left:10,right:40}}>
                           <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9"/>
                           <XAxis type="number" domain={[0,100]} tickFormatter={v=>`${v}%`} tick={{fontSize:9}}/>
                           <YAxis type="category" dataKey="area" width={170} tick={{fontSize:9}}/>
-                          <Tooltip formatter={v=>`${v?.toFixed(1)}%`}/>
+                          <Tooltip formatter={fmt}/>
                           <Bar dataKey="pct" radius={[0,5,5,0]}>
                             {data.map((a,i)=><Cell key={i} fill={clr(a.pct)}/>)}
                           </Bar>
@@ -461,48 +485,52 @@
 
           {/* GÉNERO */}
           {tab==="genero" && (
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}>
-              <Card title="Género × Concepto (Global)" col="1/-1">
+            <div style={grid2}>
+              <Card title="Género × Concepto (Global)" span2>
                 <ResponsiveContainer width="100%" height={220}>
                   <BarChart data={CK.map(c=>({concepto:c.label,Femenino:T9.f[c.k],Masculino:T9.m[c.k]}))}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9"/>
                     <XAxis dataKey="concepto" tick={{fontSize:8}} interval={0}/>
                     <YAxis domain={[0,100]} tickFormatter={v=>`${v}%`} tick={{fontSize:9}}/>
-                    <Tooltip formatter={v=>`${v?.toFixed(1)}%`}/>
+                    <Tooltip formatter={fmt}/>
                     <Legend wrapperStyle={{fontSize:10}}/>
-                    <Bar name="Femenino" dataKey="Femenino" fill="#ec4899" radius={[4,4,0,0]}/>
+                    <Bar name="Femenino"  dataKey="Femenino"  fill="#ec4899" radius={[4,4,0,0]}/>
                     <Bar name="Masculino" dataKey="Masculino" fill="#6366f1" radius={[4,4,0,0]}/>
                   </BarChart>
                 </ResponsiveContainer>
               </Card>
               {[{e:entA,d:T6[entA]},...(cmp?[{e:entB,d:T6[entB]}]:[])].map(({e,d})=>(
-                <Card key={e} title={`Género — ${entLabel(e)}`}>
+                <Card key={e} title={`Género — ${lbl(e)}`}>
                   {[{g:"Femenino",v:d?.f,col:"#ec4899"},{g:"Masculino",v:d?.m,col:"#6366f1"}].filter(r=>r.v!=null).map((r,i)=>(
                     <div key={i} style={{marginBottom:14}}>
                       <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
                         <span style={{fontSize:13,fontWeight:600}}>{r.g}</span>
-                        <span style={{fontSize:14,fontWeight:700,color:clr(r.v)}}>{r.v?.toFixed(1)}%</span>
+                        <span style={{fontSize:14,fontWeight:700,color:clr(r.v)}}>{fmt(r.v)}</span>
                       </div>
                       <div style={{background:"#f1f5f9",borderRadius:99,height:10}}>
                         <div style={{width:`${r.v}%`,height:"100%",borderRadius:99,background:r.col}}/>
                       </div>
+                      <div style={{fontSize:10,color:"#64748b",marginTop:3}}>{r.v>=70?"✓ Aceptable":r.v>=50?"⚠ Atención":"✗ Crítico"}</div>
                     </div>
                   ))}
                 </Card>
               ))}
+              <Card title="Comparativo Género por Entidad" span2>
+                <Bars data={gData} kA={entA} kB={entB} xKey="name" h={180}/>
+              </Card>
             </div>
           )}
 
           {/* TIPO */}
           {tab==="tipo" && (
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}>
-              <Card title="Tipo × Concepto (Global)" col="1/-1">
+            <div style={grid2}>
+              <Card title="Tipo × Concepto (Global)" span2>
                 <ResponsiveContainer width="100%" height={220}>
-                  <BarChart data={CK.map(c=>({concepto:c.label,Contratista:T10.contratista[c.k],Vinculado:T10.vinculado[c.k],Otro:T10.otro[c.k]}))}>
+                  <BarChart data={CK.map(c=>({concepto:c.label,...T10.Contratista&&{Contratista:T10.Contratista[c.k]},Vinculado:T10.Vinculado[c.k],Otro:T10.Otro[c.k]}))}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9"/>
                     <XAxis dataKey="concepto" tick={{fontSize:8}} interval={0}/>
                     <YAxis domain={[0,100]} tickFormatter={v=>`${v}%`} tick={{fontSize:9}}/>
-                    <Tooltip formatter={v=>`${v?.toFixed(1)}%`}/>
+                    <Tooltip formatter={fmt}/>
                     <Legend wrapperStyle={{fontSize:10}}/>
                     <Bar name="Contratista" dataKey="Contratista" fill={C[0]} radius={[4,4,0,0]}/>
                     <Bar name="Vinculado"   dataKey="Vinculado"   fill={C[1]} radius={[4,4,0,0]}/>
@@ -511,30 +539,30 @@
                 </ResponsiveContainer>
               </Card>
               {[{e:entA,d:T7[entA]},...(cmp?[{e:entB,d:T7[entB]}]:[])].map(({e,d})=>(
-                <Card key={e} title={`Tipo — ${entLabel(e)}`}>
+                <Card key={e} title={`Tipo — ${lbl(e)}`}>
                   {["contratista","vinculado","otro"].map((t,i)=>d?.[t]!=null&&
                     <SBar key={i} label={cap(t)} p={d[t]} color={C[i]}/>)}
                 </Card>
               ))}
-              <Card title="Comparativo por Tipo" col="1/-1">
-                <BarsChart data={tipoData} kA={entA} kB={entB} xKey="name" h={180}/>
+              <Card title="Comparativo por Tipo" span2>
+                <Bars data={tData} kA={entA} kB={entB} xKey="name" h={180}/>
               </Card>
             </div>
           )}
 
           {/* OCUPACIÓN */}
           {tab==="ocupacion" && (
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}>
-              <Card title={`Ocupación${cmp?` — ${entLabel(entA)} vs ${entLabel(entB)}`:` — ${entLabel(entA)}`}`} col="1/-1">
-                <BarsChart data={ocupData} kA={entA} kB={entB} xKey="name" h={220}/>
+            <div style={grid2}>
+              <Card title={`Ocupación — ${lbl(entA)}${cmp?` vs ${lbl(entB)}`:""}`} span2>
+                <Bars data={oData} kA={entA} kB={entB} xKey="name" h={220}/>
               </Card>
               {[{e:entA,d:T8[entA]},...(cmp?[{e:entB,d:T8[entB]}]:[])].map(({e,d})=>(
-                <Card key={e} title={`Detalle — ${entLabel(e)}`}>
+                <Card key={e} title={`Detalle — ${lbl(e)}`}>
                   {Object.entries(d||{}).filter(([,v])=>v!=null).sort((a,b)=>b[1]-a[1]).map(([o,p],i)=>(
                     <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",
-                      padding:"6px 10px",marginBottom:5,borderRadius:7,background:bg(p)}}>
-                      <span style={{fontSize:12,fontWeight:600,color:"#1e293b"}}>{cap(o)}</span>
-                      <span style={{fontSize:15,fontWeight:700,color:fc(p)}}>{p?.toFixed(1)}%</span>
+                      padding:"6px 10px",marginBottom:5,borderRadius:7,background:bgc(p)}}>
+                      <span style={{fontSize:12,fontWeight:600,color:"#1e293b"}}>{o}</span>
+                      <span style={{fontSize:15,fontWeight:700,color:fgc(p)}}>{fmt(p)}</span>
                     </div>
                   ))}
                 </Card>
@@ -554,12 +582,12 @@
               <a href="mailto:jorge.brand@medellin.gov.co" style={{color:"#6366f1"}}>jorge.brand@medellin.gov.co</a>
             </div>
           </div>
-
         </div>
       );
     }
 
-    ReactDOM.render(<App/>, document.getElementById("root"));
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(<App/>);
   </script>
 </body>
 </html>
