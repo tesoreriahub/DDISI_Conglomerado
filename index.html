@@ -40,7 +40,7 @@
     const ENT_LIST = [
       "Todas las entidades","agencia app","bpp","bureau de medellin",
       "despacho secretaria de hacienda","empresa de desarrollo urbano","esu","fonvalmed",
-      "otra","sapiencia","secretaria de hacienda","subsecretaria de ingresos",
+      "otra","ruta n","sapiencia","secretaria de hacienda","subsecretaria de ingresos",
       "subsecretaria de presupuesto y gestion financiera","subsecretaria de tesoreria","telemedellin"
     ];
 
@@ -54,13 +54,14 @@
       "esu":                     {ap:93.77,au:85.97,bf:93.77,ce:94.55,dd:73.82,dm:80.78,ec:79.80,nw:81.14,oa:64.44,rs:98.91,gl:83.53},
       "fonvalmed":               {ap:89.42,au:79.89,bf:93.92,ce:85.19,dd:62.59,dm:73.54,ec:65.23,nw:74.31,oa:47.12,rs:96.30,gl:75.12},
       "otra":                    {ap:100,au:85.71,bf:100,ce:90,dd:70,dm:78.57,ec:77.78,nw:75,oa:61.11,rs:100,gl:82.61},
+      "ruta n":                  {ap:92.91,au:80.91,bf:95.89,ce:93.44,dd:69.44,dm:79.09,ec:72.44,nw:75.40,oa:63.82,rs:97.44,gl:80.77},
       "sapiencia":               {ap:92.60,au:80.92,bf:94.79,ce:91.53,dd:69.49,dm:79.04,ec:76.80,nw:80.11,oa:65.86,rs:95.91,gl:81.75},
       "secretaria de hacienda":  {ap:59.01,au:57.14,bf:78.88,ce:72.17,dd:46.96,dm:68.32,ec:52.66,nw:57.07,oa:41.06,rs:79.13,gl:59.92},
       "subsecretaria de ingresos":{ap:69.31,au:63.17,bf:81.81,ce:74.14,dd:50.31,dm:65.74,ec:56.68,nw:57.62,oa:45.83,rs:84.14,gl:63.58},
       "subsecretaria de presupuesto y gestion financiera":{ap:74.42,au:65.35,bf:87.74,ce:76.49,dd:52.03,dm:63.03,ec:58.03,nw:60.98,oa:46.77,rs:88.92,gl:65.97},
       "subsecretaria de tesoreria":{ap:77.51,au:66.79,bf:88.53,ce:78.68,dd:52.19,dm:69.67,ec:58.87,nw:62.72,oa:48.44,rs:90.00,gl:67.96},
       "telemedellin":            {ap:93.14,au:81.14,bf:96.00,ce:95.20,dd:72.80,dm:79.43,ec:78.22,nw:81.50,oa:87.11,rs:93.60,gl:85.45},
-      "Todas las entidades":     {ap:81.03,au:70.90,bf:89.34,ce:82.31,dd:57.50,dm:70.76,ec:63.45,nw:67.28,oa:51.53,rs:91.01,gl:71.18},
+      "Todas las entidades":     {ap:82.18,au:71.87,bf:89.98,ce:83.39,dd:58.66,dm:71.57,ec:64.33,nw:68.07,oa:52.72,rs:91.63,gl:72.11},
     };
 
     const CK = [
@@ -106,6 +107,7 @@
         {area:"Gestión Jurídica",pct:52.17},{area:"Adm. Contribución Valoriz.",pct:42.03},
       ],
       "otra":[{area:"Sin Área",pct:82.61}],
+      "ruta n":[{area:"Sin Área",pct:80.77}],
       "sapiencia":[{area:"Sin Área",pct:81.75}],
       "secretaria de hacienda":[
         {area:"Desarrollos Tecnológicos",pct:86.96},{area:"Jurídica",pct:78.99},
@@ -146,12 +148,12 @@
       "agencia app":{f:71.06,m:78.74},"bpp":{f:54.59,m:81.16},
       "bureau de medellin":{f:66.43,m:78.47},"despacho secretaria de hacienda":{f:80.43,m:81.88},
       "empresa de desarrollo urbano":{f:75.24,m:78.02},"esu":{f:78.10,m:88.77},
-      "fonvalmed":{f:70.84,m:81.85},"otra":{f:82.61,m:null},
+      "fonvalmed":{f:70.84,m:81.85},"otra":{f:82.61,m:null},"ruta n":{f:80.18,m:81.27},
       "sapiencia":{f:81.04,m:82.99},"secretaria de hacienda":{f:52.90,m:65.33},
       "subsecretaria de ingresos":{f:61.00,m:67.17},
       "subsecretaria de presupuesto y gestion financiera":{f:65.76,m:66.38},
       "subsecretaria de tesoreria":{f:65.58,m:70.75},"telemedellin":{f:86.96,m:84.97},
-      "Todas las entidades":{f:68.95,m:74.21},
+      "Todas las entidades":{f:69.85,m:75.06},
     };
 
     // Tabla Entidad × Tipo
@@ -164,13 +166,14 @@
       "esu":{contratista:84.50,otro:null,vinculado:83.23},
       "fonvalmed":{contratista:75.16,otro:89.86,vinculado:66.67},
       "otra":{contratista:100,otro:null,vinculado:65.22},
+      "ruta n":{contratista:81.39,otro:null,vinculado:79.65},
       "sapiencia":{contratista:82.05,otro:66.67,vinculado:73.43},
       "secretaria de hacienda":{contratista:47.62,otro:null,vinculado:65.31},
       "subsecretaria de ingresos":{contratista:62.84,otro:null,vinculado:65.70},
       "subsecretaria de presupuesto y gestion financiera":{contratista:68.22,otro:null,vinculado:64.01},
       "subsecretaria de tesoreria":{contratista:69.10,otro:null,vinculado:62.47},
       "telemedellin":{contratista:88.41,otro:84.66,vinculado:82.61},
-      "Todas las entidades":{contratista:71.62,otro:78.34,vinculado:69.66},
+      "Todas las entidades":{contratista:72.49,otro:78.34,vinculado:70.88},
     };
 
     // Tabla Entidad × Ocupación
@@ -183,26 +186,27 @@
       "esu":{Auxiliar:80.72,Líder:80.19,Profesional:83.54,Técnico:86.23},
       "fonvalmed":{Auxiliar:81.64,Gerente:63.77,Líder:75.12,Profesional:72.51,Técnico:84.54},
       "otra":{Auxiliar:82.61},
+      "ruta n":{Auxiliar:77.78,Gerente:75.36,Líder:79.71,Profesional:80.96,Técnico:82.13},
       "sapiencia":{Líder:85.69,Profesional:81.87,Técnico:80.19},
       "secretaria de hacienda":{Auxiliar:55.07,Contratista:47.62,Líder:92.75,Profesional:75.72,Secretario:51.45,Técnico:84.06},
       "subsecretaria de ingresos":{Auxiliar:78.53,Contratista:62.84,Líder:61.59,Profesional:60.43,Secretario:81.64,Técnico:56.52},
       "subsecretaria de presupuesto y gestion financiera":{Contratista:68.22,Líder:67.21,Profesional:65.78,Técnico:56.86},
       "subsecretaria de tesoreria":{Auxiliar:55.39,Contratista:69.10,Líder:65.80,Profesional:69.57,Secretario:59.42,Técnico:39.49},
       "telemedellin":{Líder:85.02,Profesional:84.54,Técnico:89.49},
-      "Todas las entidades":{Auxiliar:73.79,Contratista:66.08,Gerente:63.77,Líder:72.31,Profesional:75.04,Secretario:65.70,Técnico:75.06},
+      "Todas las entidades":{Auxiliar:73.93,Contratista:66.08,Gerente:71.50,Líder:73.34,Profesional:76.14,Secretario:65.70,Técnico:75.61},
     };
 
     // Género × Concepto
     const T9 = {
-      f:{ap:79.37,au:68.29,bf:88.13,ce:80.87,dd:55.70,dm:68.99,ec:61.02,nw:65.08,oa:46.42,rs:90.73},
-      m:{ap:83.28,au:74.45,bf:91.00,ce:84.27,dd:59.96,dm:73.17,ec:66.76,nw:70.27,oa:58.47,rs:91.38},
+      f:{ap:80.43,au:69.09,bf:88.72,ce:82.06,dd:56.92,dm:69.90,ec:61.90,nw:65.85,oa:47.44,rs:91.33},
+      m:{ap:84.46,au:75.49,bf:91.62,ce:85.12,dd:60.93,dm:73.75,ec:67.48,nw:70.95,oa:59.59,rs:92.02},
     };
 
     // Tipo × Concepto
     const T10 = {
-      Contratista:{ap:81.58,au:70.36,bf:89.55,ce:81.98,dd:58.80,dm:72.13,ec:64.22,nw:67.61,oa:52.20,rs:90.77},
+      Contratista:{ap:82.54,au:71.32,bf:90.10,ce:83.00,dd:59.89,dm:72.64,ec:65.05,nw:68.35,oa:53.62,rs:91.30},
       Otro:       {ap:89.68,au:74.60,bf:96.03,ce:93.33,dd:64.44,dm:73.02,ec:72.84,nw:72.92,oa:64.20,rs:93.33},
-      Vinculado:  {ap:79.14,au:72.05,bf:88.45,ce:82.53,dd:53.83,dm:67.20,ec:60.97,nw:66.13,oa:49.11,rs:91.48},
+      Vinculado:  {ap:80.95,au:73.09,bf:89.39,ce:83.85,dd:55.39,dm:68.91,ec:62.15,nw:67.14,oa:49.98,rs:92.36},
     };
 
     // ── HELPERS ──
@@ -323,7 +327,7 @@
               <div style={{fontSize:12,fontWeight:400,color:"#94a3b8",marginTop:2}}>
                 Secretaría de Hacienda y Conglomerado Público
               </div>
-              <div style={{fontSize:10,color:"#64748b",marginTop:4}}>Fecha actualización: Junio 2026</div>
+              <div style={{fontSize:10,color:"#64748b",marginTop:4}}>Fecha actualización: Octubre 2026</div>
             </div>
             <button className="no-print" onClick={doPrint}
               style={{background:"#6366f1",color:"#fff",border:"none",borderRadius:8,
@@ -372,7 +376,7 @@
                 {icon:"🎯",label:"Cumplimiento",val:fmt(dB.gl),
                   sub:dB.gl>=70?"✓ Aceptable":dB.gl>=50?"⚠ En riesgo":"✗ Crítico",
                   scol:clr(dB.gl),col:C[1]},
-              ]:[{icon:"🌐",label:"Promedio Global",val:"71.18%",sub:"✓ Aceptable",scol:"#10b981",col:"#64748b"}]),
+              ]:[{icon:"🌐",label:"Promedio Global",val:"72.11%",sub:"✓ Aceptable",scol:"#10b981",col:"#64748b"}]),
             ].map((k,i)=>(
               <div key={i} style={{background:"#fff",borderRadius:10,padding:"12px 14px",
                 boxShadow:"0 1px 3px rgba(0,0,0,.07)",borderTop:`3px solid ${k.col}`}}>
